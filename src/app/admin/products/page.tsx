@@ -161,7 +161,7 @@ export default function AdminProducts() {
                                     </div>
                                     <div>
                                         <label className="block text-sm font-bold opacity-70 mb-2">Categoría</label>
-                                        <select value={modalData.category} onChange={e => setModalData({ ...modalData, category: e.target.value as string })} className="w-full p-4 h-full rounded-xl border border-ghost shadow-sm focus:outline-none" style={{ background: 'var(--color-surface-container-lowest)' }}>
+                                        <select value={modalData.category} onChange={e => setModalData({ ...modalData, category: e.target.value as string })} className="w-full p-4 rounded-xl border border-ghost shadow-sm focus:outline-none appearance-none" style={{ background: 'var(--color-surface-container-lowest)' }}>
                                             {categories.filter(c => c !== 'Todas').map(c => <option key={c} value={c}>{c}</option>)}
                                         </select>
                                     </div>
