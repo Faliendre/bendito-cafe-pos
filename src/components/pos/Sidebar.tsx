@@ -22,38 +22,38 @@ export function Sidebar() {
     const [showEndShift, setShowEndShift] = useState(false);
 
     return (
-        <div className="w-24 md:w-32 h-full flex flex-col pt-6 pb-6" style={{ background: 'var(--color-surface-container-low)' }}>
-            <div className="flex justify-center items-center mb-8 px-2">
+        <div className="w-full md:w-32 h-auto md:h-full flex flex-row md:flex-col pt-2 pb-2 md:pt-6 md:pb-6 flex-shrink-0" style={{ background: 'var(--color-surface-container-low)' }}>
+            <div className="hidden md:flex justify-center items-center mb-8 px-2">
                 <div className="w-16 h-16 relative rounded-full overflow-hidden border-2 border-white shadow-sm bg-white">
                     <Image src="/assets/logo/logo_bentido_cafe.jpeg" alt="Bendito Café" fill className="object-cover" />
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-3 space-y-4">
+            <div className="flex-1 flex flex-row md:flex-col overflow-x-auto md:overflow-x-hidden md:overflow-y-auto px-2 md:px-3 gap-2 md:gap-0 md:space-y-4 scrollbar-hide">
                 {categories.map((cat) => {
                     const isActive = selectedCategory === cat;
                     return (
                         <button
                             key={cat}
                             onClick={() => setSelectedCategory(cat)}
-                            className={`w-full aspect-square flex flex-col items-center justify-center rounded-[1.5rem] transition-all
+                            className={`min-w-[4.5rem] md:w-full md:aspect-square flex flex-col items-center justify-center p-2 md:p-0 rounded-2xl md:rounded-[1.5rem] transition-all
                 ${isActive ? 'shadow-ambient bg-white' : 'hover:bg-black/5'}
               `}
                             style={{
                                 color: isActive ? 'var(--color-primary)' : 'var(--color-on-surface-variant)'
                             }}
                         >
-                            <div className="mb-2">
+                            <div className="mb-1 md:mb-2 scale-75 md:scale-100">
                                 {iconMap[cat] || <Coffee size={24} />}
                             </div>
-                            <span className="text-[11px] md:text-sm font-bold text-center leading-tight">{cat}</span>
+                            <span className="text-[10px] md:text-sm font-bold text-center leading-tight whitespace-nowrap md:whitespace-normal">{cat}</span>
                         </button>
                     );
                 })}
             </div>
 
             {/* Bottom Controls */}
-            <div className="mt-auto pt-6 px-3 space-y-4 border-t border-black/5">
+            <div className="hidden md:block mt-auto pt-6 px-3 space-y-4 border-t border-black/5">
                 <Link href="/admin" className="w-full aspect-square flex flex-col items-center justify-center rounded-[1.5rem] transition-all hover:bg-black/5" style={{ color: 'var(--color-on-surface-variant)' }}>
                     <LayoutDashboard size={24} className="mb-2" />
                     <span className="text-[11px] md:text-sm font-bold">Admin</span>
