@@ -69,27 +69,27 @@ export default function AdminProducts() {
         <div className="min-h-screen flex flex-col md:flex-row text-on-surface" style={{ background: 'var(--color-surface)' }}>
             <AdminSidebar active="products" />
 
-            <main className="flex-1 p-8 md:p-12 overflow-y-auto">
-                <header className="mb-12 flex justify-between items-end">
+            <main className="flex-1 p-4 md:p-8 lg:p-12 overflow-y-auto">
+                <header className="mb-6 md:mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                     <div>
-                        <h2 className="font-display text-4xl font-bold tracking-tight" style={{ color: 'var(--color-on-surface)' }}>Gestión de Productos</h2>
-                        <p className="opacity-70 mt-2 text-lg">Modifica precios, oculta productos y añade nuevos al menú.</p>
+                        <h2 className="font-display text-3xl md:text-4xl font-bold tracking-tight" style={{ color: 'var(--color-on-surface)' }}>Gestión de Productos</h2>
+                        <p className="opacity-70 mt-1 md:mt-2 text-base md:text-lg">Modifica precios, oculta productos y añade nuevos al menú.</p>
                     </div>
                     <button
                         onClick={() => { setModalData({ name: '', price: 0, category: 'Café', variable_price: false, active: true }); setShowModal(true); }}
-                        className="btn-primary rounded-2xl flex items-center gap-2 px-6 py-3 font-bold shadow-ambient transition-transform active:scale-95"
+                        className="btn-primary rounded-2xl flex items-center gap-2 px-6 py-3 font-bold shadow-ambient transition-transform active:scale-95 w-full md:w-auto mt-4 md:mt-0 justify-center"
                     >
                         <Plus size={20} /> Nuevo Producto
                     </button>
                 </header>
 
                 {/* Filters */}
-                <div className="flex gap-2 overflow-x-auto pb-4 mb-8">
+                <div className="flex gap-2 overflow-x-auto pb-4 mb-6 md:mb-8 scrollbar-hide">
                     {categories.map(cat => (
                         <button
                             key={cat}
                             onClick={() => setCategoryFilter(cat)}
-                            className={`px-5 py-2.5 rounded-full font-bold whitespace-nowrap transition-colors border shadow-sm ${categoryFilter === cat ? '' : 'hover:bg-black/5 opacity-70 border-transparent'}`}
+                            className={`px-4 md:px-5 py-2.5 rounded-full text-sm md:text-base font-bold whitespace-nowrap transition-colors border shadow-sm ${categoryFilter === cat ? '' : 'hover:bg-black/5 opacity-70 border-transparent'}`}
                             style={categoryFilter === cat ? { background: 'var(--color-surface-container-highest)', color: 'var(--color-primary)', borderColor: 'var(--color-ghost)' } : {}}
                         >
                             {cat}
@@ -97,15 +97,15 @@ export default function AdminProducts() {
                     ))}
                 </div>
 
-                <div className="bg-white rounded-3xl shadow-ambient border-ghost border overflow-hidden" style={{ background: 'var(--color-surface-container-lowest)' }}>
-                    <table className="w-full text-left border-collapse">
+                <div className="bg-white rounded-2xl md:rounded-3xl shadow-ambient border-ghost border overflow-x-auto" style={{ background: 'var(--color-surface-container-lowest)' }}>
+                    <table className="w-full text-left border-collapse min-w-[600px]">
                         <thead>
-                            <tr className="border-b border-ghost" style={{ background: 'var(--color-surface-container-low)' }}>
-                                <th className="p-5 font-bold opacity-70">Estado</th>
-                                <th className="p-5 font-bold opacity-70">Nombre</th>
-                                <th className="p-5 font-bold opacity-70">Categoría</th>
-                                <th className="p-5 font-bold opacity-70">Precio (Bs)</th>
-                                <th className="p-5 font-bold w-1/4">Acciones</th>
+                            <tr className="border-b border-ghost text-sm md:text-base" style={{ background: 'var(--color-surface-container-low)' }}>
+                                <th className="p-4 md:p-5 font-bold opacity-70">Estado</th>
+                                <th className="p-4 md:p-5 font-bold opacity-70">Nombre</th>
+                                <th className="p-4 md:p-5 font-bold opacity-70">Categoría</th>
+                                <th className="p-4 md:p-5 font-bold opacity-70">Precio (Bs)</th>
+                                <th className="p-4 md:p-5 font-bold w-1/4">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
