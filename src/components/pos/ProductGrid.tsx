@@ -53,10 +53,10 @@ export function ProductGrid() {
     };
 
     return (
-        <div className="flex-1 p-6 overflow-y-auto">
+        <div className="flex-1 p-4 md:p-6 pb-32 md:pb-6 overflow-y-auto">
             <h2 className="text-3xl font-display font-semibold mb-6 tracking-tight">{selectedCategory}</h2>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                 {filteredProducts.map(product => (
                     <button
                         key={product.id}
