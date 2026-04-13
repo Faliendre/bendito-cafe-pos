@@ -50,6 +50,16 @@ export function Sidebar() {
                         </button>
                     );
                 })}
+
+                {/* Controles extra para móvil (al final de la lista) */}
+                <Link href="/admin" className="md:hidden min-w-[4.5rem] flex flex-col items-center justify-center p-2 rounded-2xl transition-all hover:bg-black/5" style={{ color: 'var(--color-on-surface-variant)' }}>
+                    <div className="mb-1 scale-75"><LayoutDashboard size={24} /></div>
+                    <span className="text-[10px] font-bold text-center leading-tight">Admin</span>
+                </Link>
+                <button onClick={() => setShowEndShift(true)} className="md:hidden min-w-[4.5rem] flex flex-col items-center justify-center p-2 rounded-2xl transition-all hover:bg-black/5" style={{ color: 'var(--color-on-surface-variant)' }}>
+                    <div className="mb-1 scale-75"><LogOut size={24} /></div>
+                    <span className="text-[10px] font-bold text-center leading-tight whitespace-nowrap">Cerrar</span>
+                </button>
             </div>
 
             {/* Bottom Controls */}
