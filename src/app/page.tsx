@@ -1,6 +1,6 @@
 "use client"
 import React, { useState } from 'react';
-import { PosProvider, usePos } from '@/lib/pos-context';
+import { usePos } from '@/lib/pos-context';
 import { Sidebar } from '@/components/pos/Sidebar';
 import { ProductGrid } from '@/components/pos/ProductGrid';
 import { OrderSummary } from '@/components/pos/OrderSummary';
@@ -55,9 +55,5 @@ function PosContent() {
 }
 
 export default function PosPage() {
-  return (
-    <PosProvider>
-      <PosContent />
-    </PosProvider>
-  );
+  return <PosContent />;
 }

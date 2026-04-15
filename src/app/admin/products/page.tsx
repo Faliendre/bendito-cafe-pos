@@ -4,8 +4,10 @@ import { supabase } from '@/lib/supabase/client';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { Product } from '@/lib/types';
 import { Plus, Edit2, ShieldCheck, ShieldAlert, Check, X, Tag } from 'lucide-react';
+import { usePos } from '@/lib/pos-context';
 
 export default function AdminProducts() {
+    const { showMessage } = usePos();
     const [products, setProducts] = useState<Product[]>([]);
     const [categoryFilter, setCategoryFilter] = useState('Todas');
     const [isEditing, setIsEditing] = useState<Partial<Product> | null>(null);
@@ -51,10 +53,11 @@ export default function AdminProducts() {
             }
             setShowModal(false);
             setModalData({ name: '', price: 0, category: 'Café', variable_price: false, active: true });
+            showMessage("Producto Guardado", `El producto "${modalData.name}" se ha guardado correctamente.`, "success");
             loadProducts(); // reload
         } catch (error) {
             console.error("Error saving product", error);
-            alert("Error al guardar el producto");
+            showMessage("Error", "No se pudo guardar el producto en el catálogo.", "error");
         }
     }
 

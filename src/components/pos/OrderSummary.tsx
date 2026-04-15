@@ -4,7 +4,7 @@ import { usePos } from '@/lib/pos-context';
 import { Minus, Plus, Trash2, CreditCard, Banknote, QrCode } from 'lucide-react';
 
 export function OrderSummary() {
-    const { cart, removeFromCart, updateQuantity, cartTotal, clearCart, checkout, activeOrderId, openOrders } = usePos();
+    const { cart, removeFromCart, updateQuantity, cartTotal, clearCart, checkout, activeOrderId, openOrders, showMessage } = usePos();
     const [customerName, setCustomerName] = useState('');
     const [showPayment, setShowPayment] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
@@ -27,8 +27,9 @@ export function OrderSummary() {
         if (success) {
             setShowPayment(false);
             setCustomerName('');
+            showMessage("Pago Exitoso", "La venta se ha registrado correctamente.", "success");
         } else {
-            alert("Error procesando pago. Intente de nuevo.");
+            showMessage("Error", "No se pudo procesar el pago. Por favor intenta de nuevo.", "error");
         }
     };
 
@@ -98,14 +99,18 @@ export function OrderSummary() {
                         onClick={async () => {
                             if (cartTotal > 0) {
                                 if (!customerName.trim()) {
-                                    alert("Por favor, ingresa un nombre o número de mesa para dejar la cuenta abierta.");
+                                    showMessage("Falta información", "Por favor, ingresa el nombre del cliente o número de mesa para dejar la cuenta abierta.", "warning");
                                     return;
                                 }
                                 setIsProcessing(true);
                                 const success = await checkout('pendiente', customerName, 'pendiente');
                                 setIsProcessing(false);
-                                if (success) setCustomerName('');
-                                else alert("Error procesando pago. Intente de nuevo.");
+                                if (success) {
+                                    setCustomerName('');
+                                    showMessage("Cuenta Guardada", "La cuenta se ha guardado como abierta correctamente.", "success");
+                                } else {
+                                    showMessage("Error", "No se pudo guardar la cuenta. Por favor intenta de nuevo.", "error");
+                                }
                             }
                         }}
                         disabled={cart.length === 0 || isProcessing}

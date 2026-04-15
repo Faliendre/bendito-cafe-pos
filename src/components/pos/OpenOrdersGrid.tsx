@@ -4,16 +4,19 @@ import { usePos } from '@/lib/pos-context';
 import { Receipt, Clock, User, PlusCircle } from 'lucide-react';
 
 export function OpenOrdersGrid() {
-    const { openOrders, refreshOpenOrders, loadOrderIntoCart } = usePos();
+    const { openOrders, refreshOpenOrders, loadOrderIntoCart, showConfirm } = usePos();
 
     useEffect(() => {
         refreshOpenOrders();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const handleSelect = (order: any) => {
-        const confirmLoad = window.confirm(`¿Deseas agregar/editar la orden de ${order.customer_name}?`);
-        if (confirmLoad) {
+    const handleSelect = async (order: any) => {
+        const confirmed = await showConfirm(
+            "Abrir Cuenta",
+            `¿Deseas cargar la orden de ${order.customer_name || 'este cliente'} para editarla o cobrarla?`
+        );
+        if (confirmed) {
             loadOrderIntoCart(order);
         }
     };

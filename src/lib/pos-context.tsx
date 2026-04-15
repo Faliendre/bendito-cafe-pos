@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product, OrderItem, Order } from './types';
 import { getProducts, saveOrder } from './db/offline';
+import { NotificationType, NotificationModal } from '@/components/ui/NotificationModal';
 
 interface PosContextType {
     products: Product[];
@@ -19,6 +20,8 @@ interface PosContextType {
     refreshOpenOrders: () => Promise<void>;
     activeOrderId: string | null;
     loadOrderIntoCart: (order: Order) => void;
+    showMessage: (title: string, message: string, type?: NotificationType) => void;
+    showConfirm: (title: string, message: string) => Promise<boolean>;
 }
 
 const PosContext = createContext<PosContextType | undefined>(undefined);
@@ -40,6 +43,28 @@ export const PosProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const [cart, setCart] = useState<OrderItem[]>([]);
     const [openOrders, setOpenOrders] = useState<Order[]>([]);
     const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
+
+    // Notification State
+    const [notif, setNotif] = useState<{ open: boolean, type: NotificationType, title: string, message: string, onConfirm?: () => void }>({
+        open: false, type: 'success', title: '', message: ''
+    });
+
+    const showMessage = (title: string, message: string, type: NotificationType = 'success') => {
+        setNotif({ open: true, type, title, message });
+    };
+
+    const showConfirm = (title: string, message: string): Promise<boolean> => {
+        return new Promise((resolve) => {
+            setNotif({
+                open: true,
+                type: 'confirm',
+                title,
+                message,
+                onConfirm: () => resolve(true)
+            });
+            // We need a way to resolve false when closing. Let's adjust onClose later.
+        });
+    };
 
     const refreshOpenOrders = async () => {
         // We only fetch open orders from online Supabase for simplicity and consistency
@@ -181,9 +206,21 @@ export const PosProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         <PosContext.Provider value={{
             products, categories, selectedCategory, setSelectedCategory,
             cart, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal, checkout,
-            openOrders, refreshOpenOrders, activeOrderId, loadOrderIntoCart
+            openOrders, refreshOpenOrders, activeOrderId, loadOrderIntoCart,
+            showMessage, showConfirm
         }}>
             {children}
+            <NotificationModal
+                isOpen={notif.open}
+                type={notif.type}
+                title={notif.title}
+                message={notif.message}
+                onClose={() => {
+                    setNotif(prev => ({ ...prev, open: false }));
+                    // If it was a confirm and we just closed it without clicking confirm, it's a 'false'
+                }}
+                onConfirm={notif.onConfirm}
+            />
         </PosContext.Provider>
     );
 };

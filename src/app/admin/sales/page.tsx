@@ -4,8 +4,10 @@ import { supabase } from '@/lib/supabase/client';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { Order } from '@/lib/types';
 import { Trash2, AlertCircle, Calendar, Receipt, ChevronDown, ChevronUp } from 'lucide-react';
+import { usePos } from '@/lib/pos-context';
 
 export default function AdminSales() {
+    const { showConfirm, showMessage } = usePos();
     const [orders, setOrders] = useState<Order[]>([]);
     const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
     const [orderDetails, setOrderDetails] = useState<Record<string, any[]>>({});
@@ -48,19 +50,22 @@ export default function AdminSales() {
     }
 
     async function deleteOrder(orderId: string) {
-        const confirmDelete = window.confirm("¿Seguro que deseas ELIMINAR esta venta? Esta acción borrará el registro y actualizará la caja de hoy.");
-        if (!confirmDelete) return;
+        const confirmed = await showConfirm(
+            "Eliminar Venta",
+            "¿Seguro que deseas ELIMINAR esta venta? Esta acción borrará el registro de forma permanente del historial."
+        );
+        if (!confirmed) return;
 
         // Thanks to ON DELETE CASCADE on order_items, deleting the order deletes its items
         const { error } = await supabase.from('orders').delete().eq('id', orderId);
 
         if (error) {
-            alert("Error al eliminar la venta.");
+            showMessage("Error", "No se pudo eliminar la venta del sistema.", "error");
             console.error(error);
         } else {
             // Remove from state
             setOrders(orders.filter(o => o.id !== orderId));
-            alert("Venta eliminada exitosamente.");
+            showMessage("Eliminada", "La venta se ha eliminado correctamente del historial.", "success");
         }
     }
 

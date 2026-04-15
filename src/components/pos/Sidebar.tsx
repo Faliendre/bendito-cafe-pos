@@ -21,7 +21,7 @@ const iconMap: Record<string, React.ReactNode> = {
 };
 
 export function Sidebar() {
-    const { categories, selectedCategory, setSelectedCategory, openOrders } = usePos();
+    const { categories, selectedCategory, setSelectedCategory, openOrders, showMessage } = usePos();
     const [showEndShift, setShowEndShift] = useState(false);
     const [daySummary, setDaySummary] = useState<{ efectivo: number, QR: number, tarjeta: number, total: number } | null>(null);
     const [loadingSummary, setLoadingSummary] = useState(false);
@@ -157,7 +157,7 @@ export function Sidebar() {
                                     <button onClick={() => setShowEndShift(false)} className="flex-1 py-4 font-bold rounded-xl border border-ghost hover:bg-white/50 transition-colors">Cancelar</button>
                                     <button onClick={() => {
                                         setShowEndShift(false);
-                                        alert("Turno finalizado y reporte generado con éxito.");
+                                        showMessage("Turno Cerrado", "El turno ha finalizado y el reporte se ha generado correctamente.", "success");
                                     }} className="flex-1 py-4 font-bold rounded-xl btn-primary">Finalizar</button>
                                 </div>
                             </div>

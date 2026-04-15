@@ -26,6 +26,8 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
+import { PosProvider } from "@/lib/pos-context";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -36,7 +38,9 @@ export default function RootLayout({
       <body
         className={`${plusJakartaSans.variable} ${manrope.variable} antialiased`}
       >
-        {children}
+        <PosProvider>
+          {children}
+        </PosProvider>
       </body>
     </html>
   );
