@@ -34,6 +34,7 @@ export async function syncOfflineOrders() {
                 .insert({
                     customer_name: order.customer_name,
                     payment_method: order.payment_method,
+                    payment_status: order.payment_status || 'pagado',
                     total: order.total,
                     status: order.status,
                 })
@@ -75,6 +76,7 @@ export async function saveOrder(order: Order): Promise<boolean> {
                 .insert({
                     customer_name: order.customer_name,
                     payment_method: order.payment_method,
+                    payment_status: order.payment_status || 'pagado',
                     total: order.total,
                     status: order.status,
                 })

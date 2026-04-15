@@ -4,10 +4,21 @@ import { usePos } from '@/lib/pos-context';
 import { Minus, Plus, Trash2, CreditCard, Banknote, QrCode } from 'lucide-react';
 
 export function OrderSummary() {
-    const { cart, removeFromCart, updateQuantity, cartTotal, clearCart, checkout } = usePos();
+    const { cart, removeFromCart, updateQuantity, cartTotal, clearCart, checkout, activeOrderId, openOrders } = usePos();
     const [customerName, setCustomerName] = useState('');
     const [showPayment, setShowPayment] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
+
+    React.useEffect(() => {
+        if (activeOrderId) {
+            const order = openOrders?.find(o => o.id === activeOrderId);
+            if (order && order.customer_name) {
+                setCustomerName(order.customer_name);
+            }
+        } else {
+            setCustomerName('');
+        }
+    }, [activeOrderId, openOrders]);
 
     const handleCheckout = async (method: 'efectivo' | 'QR' | 'tarjeta') => {
         setIsProcessing(true);
@@ -79,16 +90,35 @@ export function OrderSummary() {
                         Bs. {cartTotal.toFixed(2)}
                     </span>
                 </div>
-                <div className="flex gap-3">
-                    <button onClick={clearCart} className="flex-1 py-4 font-bold rounded-xl border border-ghost active:scale-95 transition-transform text-lg">
+                <div className="flex gap-2">
+                    <button onClick={clearCart} className="flex-1 py-3 md:py-4 font-bold rounded-xl border border-ghost active:scale-95 transition-transform text-sm md:text-lg">
                         Cancelar
                     </button>
                     <button
-                        onClick={() => cartTotal > 0 && setShowPayment(true)}
-                        disabled={cart.length === 0}
-                        className={`flex-[2] py-4 rounded-xl font-bold text-lg text-white transition-all ${cart.length === 0 ? 'opacity-50 cursor-not-allowed' : 'btn-primary'}`}
+                        onClick={async () => {
+                            if (cartTotal > 0) {
+                                if (!customerName.trim()) {
+                                    alert("Por favor, ingresa un nombre o número de mesa para dejar la cuenta abierta.");
+                                    return;
+                                }
+                                setIsProcessing(true);
+                                const success = await checkout('pendiente', customerName, 'pendiente');
+                                setIsProcessing(false);
+                                if (success) setCustomerName('');
+                                else alert("Error procesando pago. Intente de nuevo.");
+                            }
+                        }}
+                        disabled={cart.length === 0 || isProcessing}
+                        className={`flex-1 py-3 md:py-4 rounded-xl font-bold text-sm md:text-lg transition-all ${cart.length === 0 ? 'opacity-50 cursor-not-allowed bg-gray-100 text-gray-400' : 'bg-orange-100 text-orange-600 hover:bg-orange-200 active:scale-95'}`}
                     >
-                        Pagar
+                        Mesa / Abierta
+                    </button>
+                    <button
+                        onClick={() => cartTotal > 0 && setShowPayment(true)}
+                        disabled={cart.length === 0 || isProcessing}
+                        className={`flex-[1.2] py-3 md:py-4 rounded-xl font-bold text-sm md:text-lg text-white transition-all ${cart.length === 0 ? 'opacity-50 cursor-not-allowed' : 'btn-primary active:scale-95'}`}
+                    >
+                        Cobrar
                     </button>
                 </div>
             </div>

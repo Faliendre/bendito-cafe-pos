@@ -20,7 +20,8 @@ export interface OrderItem {
 export interface Order {
     id?: string;
     customer_name?: string;
-    payment_method: 'efectivo' | 'QR' | 'tarjeta';
+    payment_method: 'efectivo' | 'QR' | 'tarjeta' | 'pendiente';
+    payment_status?: 'pagado' | 'pendiente';
     total: number;
     status: 'pendiente' | 'preparando' | 'listo' | 'entregado';
     created_at?: string;

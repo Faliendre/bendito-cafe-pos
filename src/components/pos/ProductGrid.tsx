@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { usePos } from '@/lib/pos-context';
 import { Product } from '@/lib/types';
+import { OpenOrdersGrid } from './OpenOrdersGrid';
 
 export function ProductGrid() {
     const { products, selectedCategory, addToCart } = usePos();
@@ -15,6 +16,10 @@ export function ProductGrid() {
     const [customPrice, setCustomPrice] = useState('');
 
     const filteredProducts = products.filter(p => p.category === selectedCategory);
+
+    if (selectedCategory === 'Mesas Abiertas') {
+        return <OpenOrdersGrid />;
+    }
 
     const handleProductClick = (product: Product) => {
         setSelectedProduct(product);

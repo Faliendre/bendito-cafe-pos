@@ -19,6 +19,7 @@ CREATE TABLE orders (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   customer_name TEXT,
   payment_method TEXT NOT NULL,
+  payment_status TEXT DEFAULT 'pagado', -- pagado, pendiente
   total DECIMAL(10, 2) NOT NULL,
   status TEXT DEFAULT 'entregado', -- pendiente, preparando, listo, entregado
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()

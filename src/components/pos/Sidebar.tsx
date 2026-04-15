@@ -1,11 +1,12 @@
 "use client"
 import React, { useState } from 'react';
 import { usePos } from '@/lib/pos-context';
-import { Coffee, CupSoda, CakeSlice, Apple, PlusCircle, LayoutDashboard, LogOut } from 'lucide-react';
+import { Coffee, CupSoda, CakeSlice, Apple, PlusCircle, LayoutDashboard, LogOut, Receipt } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
 const iconMap: Record<string, React.ReactNode> = {
+    'Mesas Abiertas': <Receipt size={24} />,
     'Café': <Coffee size={24} />,
     'Bebidas Frías': <CupSoda size={24} />,
     'Bebidas Variadas': <CupSoda size={24} />,
