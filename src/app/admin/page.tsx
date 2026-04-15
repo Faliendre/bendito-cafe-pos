@@ -3,7 +3,8 @@ import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase/client';
 import { BarChart, ArrowUpRight, DollarSign, Package, CreditCard, Banknote, QrCode } from 'lucide-react';
-import { isToday, isThisWeek, isThisMonth, parseISO } from 'date-fns';
+import { isToday, isThisWeek, isThisMonth, parseISO, subDays, isSameDay, format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 
 export default function AdminDashboard() {
@@ -68,6 +69,30 @@ export default function AdminDashboard() {
         return { efectivo: e, QR: q, tarjeta: c };
     }, [orders, paymentFilter]);
 
+    const last7DaysSales = useMemo(() => {
+        const days = Array.from({ length: 7 }, (_, i) => subDays(new Date(), 6 - i));
+        return days.map(day => {
+            const dayStr = format(day, 'yyyy-MM-dd');
+            const dayTotal = orders
+                .filter(o => {
+                    if (o.payment_status === 'pendiente' || !o.created_at) return false;
+                    try {
+                        const orderDate = parseISO(o.created_at);
+                        return format(orderDate, 'yyyy-MM-dd') === dayStr;
+                    } catch (e) {
+                        return false;
+                    }
+                })
+                .reduce((acc, o) => acc + Number(o.total), 0);
+            return {
+                dayName: format(day, 'EEE', { locale: es }),
+                value: dayTotal
+            };
+        });
+    }, [orders]);
+
+    const maxVal = Math.max(...last7DaysSales.map(d => d.value), 10);
+
     return (
         <div className="min-h-screen flex flex-col md:flex-row text-on-surface" style={{ background: 'var(--color-surface)' }}>
             <AdminSidebar active="dashboard" />
@@ -92,14 +117,29 @@ export default function AdminDashboard() {
                     <div className="lg:col-span-2 p-8 rounded-3xl shadow-ambient border-ghost border" style={{ background: 'var(--color-surface-container-lowest)' }}>
                         <h3 className="font-display text-2xl font-bold mb-8">Ingresos Últimos 7 Días</h3>
                         <div className="h-64 flex items-end gap-4">
-                            {[0, 0, 0, 0, 0, 0, stats.today].map((h, i) => {
-                                const heightPercent = stats.total > 0 ? Math.max((h / stats.total) * 100, 10) : 10;
+                            {last7DaysSales.map((d, i) => {
+                                const heightPercent = (d.value / maxVal) * 100;
                                 return (
-                                    <div key={i} className="flex-1 flex flex-col items-center gap-3">
-                                        <div className="w-full rounded-t-xl relative group overflow-hidden" style={{ background: 'var(--color-secondary-container)', height: '100%' }}>
-                                            <div className="absolute bottom-0 w-full transition-all duration-500 rounded-t-xl" style={{ height: `${heightPercent}%`, background: 'var(--color-primary)' }}></div>
+                                    <div key={i} className="flex-1 h-full flex flex-col items-center gap-2">
+                                        <div className="flex-1 w-full flex flex-col justify-end">
+                                            {d.value > 0 && (
+                                                <span className="text-[10px] font-bold text-primary text-center mb-1">
+                                                    {Math.round(d.value)}
+                                                </span>
+                                            )}
+                                            <div className="w-full rounded-t-xl relative group overflow-hidden"
+                                                style={{
+                                                    background: 'var(--color-secondary-container)',
+                                                    height: `${Math.max((d.value / maxVal) * 100, 4)}%`,
+                                                    opacity: d.value > 0 ? 0.7 + (d.value / maxVal) * 0.3 : 0.3
+                                                }}>
+                                                <div className="absolute inset-0 bg-primary"></div>
+                                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/10 text-[10px] font-bold text-white pointer-events-none">
+                                                    Bs.{Math.round(d.value)}
+                                                </div>
+                                            </div>
                                         </div>
-                                        <span className="text-sm opacity-60 font-bold">Día {i + 1}</span>
+                                        <span className="text-[10px] md:text-xs opacity-60 font-bold capitalize">{d.dayName}</span>
                                     </div>
                                 )
                             })}
