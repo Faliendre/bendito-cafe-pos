@@ -27,6 +27,9 @@ export default function AdminDashboard() {
     const stats = useMemo(() => {
         let today = 0, week = 0, month = 0, yearTotal = 0, total = 0;
         orders.forEach(o => {
+            // ONLY sum if it's actually paid!
+            if (o.payment_status === 'pendiente') return;
+
             const amount = Number(o.total);
             const date = o.created_at ? parseISO(o.created_at) : new Date();
 
@@ -42,6 +45,8 @@ export default function AdminDashboard() {
     const activePaymentStats = useMemo(() => {
         let e = 0, q = 0, c = 0;
         orders.forEach(o => {
+            if (o.payment_status === 'pendiente') return;
+
             const amount = Number(o.total);
             const date = o.created_at ? parseISO(o.created_at) : new Date();
 
