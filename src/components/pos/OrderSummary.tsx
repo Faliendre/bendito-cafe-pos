@@ -34,10 +34,10 @@ export function OrderSummary() {
     };
 
     return (
-        <div className="w-80 lg:w-96 h-full flex flex-col" style={{ background: 'var(--color-surface-container-highest)' }}>
+        <div className="w-full h-full flex flex-col" style={{ background: 'var(--color-surface-container-highest)' }}>
             {/* Header */}
             <div className="p-6 pb-4">
-                <h2 className="font-display text-2xl font-bold tracking-tight mb-4">Orden Actual</h2>
+                <h2 className="font-display text-2xl font-bold tracking-tight mb-4 text-on-surface">Orden Actual</h2>
                 <input
                     type="text"
                     placeholder="Nombre del cliente o mesa..."
@@ -92,7 +92,7 @@ export function OrderSummary() {
                     </span>
                 </div>
                 <div className="flex gap-2">
-                    <button onClick={clearCart} className="flex-1 py-3 md:py-4 font-bold rounded-xl border border-ghost active:scale-95 transition-transform text-sm md:text-lg">
+                    <button onClick={clearCart} className="flex-1 py-4 font-bold rounded-xl border border-ghost active:scale-95 transition-transform text-[10px] sm:text-xs md:text-lg">
                         Cancelar
                     </button>
                     <button
@@ -114,14 +114,14 @@ export function OrderSummary() {
                             }
                         }}
                         disabled={cart.length === 0 || isProcessing}
-                        className={`flex-1 py-3 md:py-4 rounded-xl font-bold text-sm md:text-lg transition-all ${cart.length === 0 ? 'opacity-50 cursor-not-allowed bg-gray-100 text-gray-400' : 'bg-orange-100 text-orange-600 hover:bg-orange-200 active:scale-95'}`}
+                        className={`flex-1 py-4 rounded-xl font-bold text-[10px] sm:text-xs md:text-lg transition-all ${cart.length === 0 ? 'opacity-50 cursor-not-allowed bg-gray-100 text-gray-400' : 'bg-orange-100 text-orange-600 hover:bg-orange-200 active:scale-95'}`}
                     >
                         Mesa / Abierta
                     </button>
                     <button
                         onClick={() => cartTotal > 0 && setShowPayment(true)}
                         disabled={cart.length === 0 || isProcessing}
-                        className={`flex-[1.2] py-3 md:py-4 rounded-xl font-bold text-sm md:text-lg text-white transition-all ${cart.length === 0 ? 'opacity-50 cursor-not-allowed' : 'btn-primary active:scale-95'}`}
+                        className={`flex-[1.2] py-4 rounded-xl font-bold text-[10px] sm:text-xs md:text-lg text-white transition-all ${cart.length === 0 ? 'opacity-50 cursor-not-allowed' : 'btn-primary active:scale-95'}`}
                     >
                         Cobrar
                     </button>
@@ -130,9 +130,9 @@ export function OrderSummary() {
 
             {/* Payment Modal */}
             {showPayment && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center glass-panel p-4">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center glass-panel p-4">
                     <div className="bg-white p-8 rounded-3xl max-w-md w-full shadow-ambient flex flex-col">
-                        <h3 className="font-display text-3xl font-bold mb-2 text-center">Método de Pago</h3>
+                        <h3 className="font-display text-3xl font-bold mb-2 text-center text-on-surface">Método de Pago</h3>
                         <p className="text-center opacity-70 mb-8 text-lg">Monto total: <strong className="text-black">Bs. {cartTotal.toFixed(2)}</strong></p>
 
                         <div className="space-y-4 mb-8">

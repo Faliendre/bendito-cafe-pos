@@ -1,6 +1,7 @@
 "use client"
 import React, { useState } from 'react';
 import { usePos } from '@/lib/pos-context';
+import { useAuth } from '@/lib/auth-context';
 import { Coffee, CupSoda, CakeSlice, Apple, PlusCircle, LayoutDashboard, LogOut, Receipt } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -13,7 +14,7 @@ const iconMap: Record<string, React.ReactNode> = {
     'Bebidas Frías': <CupSoda size={24} />,
     'Bebidas Variadas': <CupSoda size={24} />,
     'Frappes': <CupSoda size={24} />,
-    'Cócteles': <CupSoda size={24} />, // Reusing CupSoda for cocktail
+    'Cócteles': <CupSoda size={24} />, 
     'Té': <Coffee size={24} />,
     'Panadería': <CakeSlice size={24} />,
     'Açaí': <Apple size={24} />,
@@ -22,6 +23,7 @@ const iconMap: Record<string, React.ReactNode> = {
 
 export function Sidebar() {
     const { categories, selectedCategory, setSelectedCategory, openOrders, showMessage } = usePos();
+    const { isAdmin, signOut } = useAuth();
     const [showEndShift, setShowEndShift] = useState(false);
     const [daySummary, setDaySummary] = useState<{ efectivo: number, QR: number, tarjeta: number, total: number } | null>(null);
     const [loadingSummary, setLoadingSummary] = useState(false);
@@ -57,7 +59,7 @@ export function Sidebar() {
         <div className="w-full md:w-32 h-auto md:h-full flex flex-row md:flex-col pt-2 pb-2 md:pt-6 md:pb-6 flex-shrink-0" style={{ background: 'var(--color-surface-container-low)' }}>
             <div className="hidden md:flex justify-center items-center mb-8 px-2">
                 <div className="w-16 h-16 relative rounded-full overflow-hidden border-2 border-white shadow-sm bg-white">
-                    <Image src="/assets/logo/logo_bentido_cafe.jpeg" alt="Bendito Café" fill className="object-cover" />
+                    <Image src="/assets/logo/logo_bentido_cafe.jpeg" alt="Bendito Café" fill sizes="64px" className="object-cover" />
                 </div>
             </div>
 
@@ -84,25 +86,37 @@ export function Sidebar() {
                 })}
 
                 {/* Controles extra para móvil (al final de la lista) */}
-                <Link href="/admin" className="md:hidden min-w-[4.5rem] flex flex-col items-center justify-center p-2 rounded-2xl transition-all hover:bg-black/5" style={{ color: 'var(--color-on-surface-variant)' }}>
-                    <div className="mb-1 scale-75"><LayoutDashboard size={24} /></div>
-                    <span className="text-[10px] font-bold text-center leading-tight">Admin</span>
-                </Link>
+                {true && (
+                    <Link href="/admin" className="md:hidden min-w-[4.5rem] flex flex-col items-center justify-center p-2 rounded-2xl transition-all hover:bg-black/5" style={{ color: 'var(--color-on-surface-variant)' }}>
+                        <div className="mb-1 scale-75"><LayoutDashboard size={24} /></div>
+                        <span className="text-[10px] font-bold text-center leading-tight">Admin</span>
+                    </Link>
+                )}
                 <button onClick={handleOpenEndShift} className="md:hidden min-w-[4.5rem] flex flex-col items-center justify-center p-2 rounded-2xl transition-all hover:bg-black/5" style={{ color: 'var(--color-on-surface-variant)' }}>
                     <div className="mb-1 scale-75"><LogOut size={24} /></div>
                     <span className="text-[10px] font-bold text-center leading-tight whitespace-nowrap">Cerrar</span>
+                </button>
+                <button onClick={() => signOut()} className="md:hidden min-w-[4.5rem] flex flex-col items-center justify-center p-2 rounded-2xl transition-all hover:bg-black/5 text-red-500">
+                    <div className="mb-1 scale-75"><LogOut size={24} /></div>
+                    <span className="text-[10px] font-bold text-center leading-tight whitespace-nowrap">Salir</span>
                 </button>
             </div>
 
             {/* Bottom Controls */}
             <div className="hidden md:block mt-auto pt-6 px-3 space-y-4 border-t border-black/5">
-                <Link href="/admin" className="w-full aspect-square flex flex-col items-center justify-center rounded-[1.5rem] transition-all hover:bg-black/5" style={{ color: 'var(--color-on-surface-variant)' }}>
-                    <LayoutDashboard size={24} className="mb-2" />
-                    <span className="text-[11px] md:text-sm font-bold">Admin</span>
-                </Link>
+                {true && (
+                    <Link href="/admin" className="w-full aspect-square flex flex-col items-center justify-center rounded-[1.5rem] transition-all hover:bg-black/5" style={{ color: 'var(--color-on-surface-variant)' }}>
+                        <LayoutDashboard size={24} className="mb-2" />
+                        <span className="text-[11px] md:text-sm font-bold">Admin</span>
+                    </Link>
+                )}
                 <button onClick={handleOpenEndShift} className="w-full aspect-square flex flex-col items-center justify-center rounded-[1.5rem] transition-all hover:bg-black/5" style={{ color: 'var(--color-on-surface-variant)' }}>
                     <LogOut size={24} className="mb-2" />
                     <span className="text-[11px] md:text-xs font-bold leading-tight text-center">Cerrar Día</span>
+                </button>
+                <button onClick={() => signOut()} className="w-full aspect-square flex flex-col items-center justify-center rounded-[1.5rem] transition-all hover:bg-black/10 text-red-600">
+                    <LogOut size={24} className="mb-2 rotate-180" />
+                    <span className="text-[11px] md:text-xs font-bold leading-tight text-center">Salir</span>
                 </button>
             </div>
 

@@ -3,6 +3,7 @@ export interface Product {
     name: string;
     price: number;
     category: string;
+    description?: string;
     variable_price: boolean;
     active: boolean;
     created_at?: string;

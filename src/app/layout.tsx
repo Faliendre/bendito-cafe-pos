@@ -27,6 +27,7 @@ export const viewport: Viewport = {
 };
 
 import { PosProvider } from "@/lib/pos-context";
+import { AuthProvider } from "@/lib/auth-context";
 
 export default function RootLayout({
   children,
@@ -38,9 +39,11 @@ export default function RootLayout({
       <body
         className={`${plusJakartaSans.variable} ${manrope.variable} antialiased`}
       >
-        <PosProvider>
-          {children}
-        </PosProvider>
+        <AuthProvider>
+          <PosProvider>
+            {children}
+          </PosProvider>
+        </AuthProvider>
       </body>
     </html>
   );
