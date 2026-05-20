@@ -1,7 +1,7 @@
 import Link from 'next/link';
-import { BarChart, Package, ReceiptText, Sparkles, Users } from 'lucide-react';
+import { BarChart, Package, ReceiptText, Sparkles, Users, Wallet } from 'lucide-react';
 
-export function AdminSidebar({ active }: { active: 'dashboard' | 'products' | 'sales' | 'employees' }) {
+export function AdminSidebar({ active }: { active: 'dashboard' | 'products' | 'sales' | 'employees' | 'expenses' }) {
     return (
         <aside className="w-full md:w-64 border-b md:border-b-0 md:border-r border-ghost flex flex-col md:pt-8 md:pb-8 p-4 md:px-6 flex-shrink-0" style={{ background: 'var(--color-surface-container-low)' }}>
             <h1 className="hidden md:block font-display font-bold text-3xl mb-12" style={{ color: 'var(--color-primary)' }}>Bendito Admin</h1>
@@ -14,6 +14,9 @@ export function AdminSidebar({ active }: { active: 'dashboard' | 'products' | 's
                 </Link>
                 <Link href="/admin/sales" className={`flex-1 md:flex-none flex items-center justify-center md:justify-start gap-2 md:gap-4 p-3 md:p-4 rounded-2xl transition-colors ${active === 'sales' ? 'shadow-ambient bg-black/5 opacity-100' : 'hover:bg-black/5 opacity-80'}`} style={active === 'sales' ? { background: 'var(--color-surface-container-highest)', color: 'var(--color-primary)' } : { color: 'var(--color-on-surface-variant)' }}>
                     <ReceiptText size={20} className="md:w-6 md:h-6" /> <span className="font-bold text-sm md:text-lg">Ventas</span>
+                </Link>
+                <Link href="/admin/expenses" className={`flex-1 md:flex-none flex items-center justify-center md:justify-start gap-2 md:gap-4 p-3 md:p-4 rounded-2xl transition-colors ${active === 'expenses' ? 'shadow-ambient bg-black/5 opacity-100' : 'hover:bg-black/5 opacity-80'}`} style={active === 'expenses' ? { background: 'var(--color-surface-container-highest)', color: 'var(--color-primary)' } : { color: 'var(--color-on-surface-variant)' }}>
+                    <Wallet size={20} className="md:w-6 md:h-6" /> <span className="font-bold text-sm md:text-lg">Gastos y Balance</span>
                 </Link>
                 <Link href="/admin/employees" className={`flex-1 md:flex-none flex items-center justify-center md:justify-start gap-2 md:gap-4 p-3 md:p-4 rounded-2xl transition-colors ${active === 'employees' ? 'shadow-ambient bg-black/5 opacity-100' : 'hover:bg-black/5 opacity-80'}`} style={active === 'employees' ? { background: 'var(--color-surface-container-highest)', color: 'var(--color-primary)' } : { color: 'var(--color-on-surface-variant)' }}>
                     <Users size={20} className="md:w-6 md:h-6" /> <span className="font-bold text-sm md:text-lg">Empleados</span>

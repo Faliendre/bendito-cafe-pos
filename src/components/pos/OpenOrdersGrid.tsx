@@ -4,21 +4,15 @@ import { usePos } from '@/lib/pos-context';
 import { Receipt, Clock, User, PlusCircle } from 'lucide-react';
 
 export function OpenOrdersGrid() {
-    const { openOrders, refreshOpenOrders, loadOrderIntoCart, showConfirm } = usePos();
+    const { openOrders, refreshOpenOrders, loadOrderIntoCart, activeOrderId } = usePos();
 
     useEffect(() => {
         refreshOpenOrders();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const handleSelect = async (order: any) => {
-        const confirmed = await showConfirm(
-            "Abrir Cuenta",
-            `¿Deseas cargar la orden de ${order.customer_name || 'este cliente'} para editarla o cobrarla?`
-        );
-        if (confirmed) {
-            loadOrderIntoCart(order);
-        }
+    const handleSelect = (order: any) => {
+        loadOrderIntoCart(order);
     };
 
     return (
@@ -44,42 +38,45 @@ export function OpenOrdersGrid() {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                    {openOrders.map(order => (
-                        <button
-                            key={order.id}
-                            onClick={() => handleSelect(order)}
-                            className="flex flex-col items-start p-5 rounded-2xl bg-white shadow-sm border border-orange-100 hover:shadow-ambient hover:border-orange-300 transform transition-transform active:scale-95"
-                        >
-                            <div className="w-full flex justify-between items-start mb-4">
-                                <div className="flex items-center gap-2">
-                                    <div className="p-2 bg-orange-100 text-orange-600 rounded-full">
-                                        <User size={20} />
+                    {openOrders.map(order => {
+                        const isActive = order.id === activeOrderId;
+                        return (
+                            <button
+                                key={order.id}
+                                onClick={() => handleSelect(order)}
+                                className={`flex flex-col items-start p-5 rounded-2xl bg-white shadow-sm border transform transition-all active:scale-95 ${isActive ? 'border-primary ring-2 ring-primary/20 bg-orange-50/10' : 'border-orange-100 hover:shadow-ambient hover:border-orange-300'}`}
+                            >
+                                <div className="w-full flex justify-between items-start mb-4">
+                                    <div className="flex items-center gap-2">
+                                        <div className={`p-2 rounded-full ${isActive ? 'bg-primary text-white' : 'bg-orange-100 text-orange-600'}`}>
+                                            <User size={20} />
+                                        </div>
+                                        <span className="font-bold text-lg text-left">{order.customer_name || 'Sin Nombre'}</span>
                                     </div>
-                                    <span className="font-bold text-lg text-left">{order.customer_name || 'Sin Nombre'}</span>
+                                    <span className={`font-bold text-xl ${isActive ? 'text-primary' : 'text-orange-600'}`}>Bs. {order.total.toFixed(2)}</span>
                                 </div>
-                                <span className="font-bold text-xl text-orange-600">Bs. {order.total.toFixed(2)}</span>
-                            </div>
 
-                            <div className="w-full relative py-2">
-                                <div className="text-sm font-medium opacity-70 mb-1 flex items-center gap-1">
-                                    <ShoppingCart size={14} /> {order.items?.length || 0} productos
+                                <div className="w-full relative py-2">
+                                    <div className="text-sm font-medium opacity-70 mb-1 flex items-center gap-1">
+                                        <ShoppingCart size={14} /> {order.items?.length || 0} productos
+                                    </div>
+                                    <div className="text-xs opacity-50 truncate w-full text-left">
+                                        {order.items?.map((item: any) => `${item.quantity}x ${item.product_name}`).join(', ')}
+                                    </div>
                                 </div>
-                                <div className="text-xs opacity-50 truncate w-full text-left">
-                                    {order.items?.map((item: any) => `${item.quantity}x ${item.product_name}`).join(', ')}
-                                </div>
-                            </div>
 
-                            <div className="w-full flex justify-between items-center mt-4 pt-4 border-t border-ghost/50">
-                                <div className="flex items-center gap-1 text-xs opacity-60 font-medium">
-                                    <Clock size={12} />
-                                    {new Date(order.created_at || '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                <div className="w-full flex justify-between items-center mt-4 pt-4 border-t border-ghost/50">
+                                    <div className="flex items-center gap-1 text-xs opacity-60 font-medium">
+                                        <Clock size={12} />
+                                        {new Date(order.created_at || '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </div>
+                                    <div className={`flex items-center gap-1 font-semibold text-sm ${isActive ? 'text-primary' : 'text-primary/70'}`}>
+                                        <PlusCircle size={16} /> {isActive ? 'Cuenta Activa' : 'Ver Detalles'}
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-1 text-primary font-semibold text-sm">
-                                    <PlusCircle size={16} /> Modificar
-                                </div>
-                            </div>
-                        </button>
-                    ))}
+                            </button>
+                        );
+                    })}
                 </div>
             )}
         </div>

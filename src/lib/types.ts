@@ -27,9 +27,19 @@ export interface Order {
     status: 'pendiente' | 'preparando' | 'listo' | 'entregado';
     created_at?: string;
     items: OrderItem[];
+    cash_received?: number;
+    change_returned?: number;
 }
 
 export interface UnsyncedOrder extends Order {
     local_id: string;
     sync_status: 'pending' | 'failed';
+}
+
+export interface Expense {
+    id?: string;
+    description: string;
+    amount: number;
+    category: string;
+    created_at?: string;
 }

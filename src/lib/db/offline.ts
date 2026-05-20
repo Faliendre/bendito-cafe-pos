@@ -37,6 +37,8 @@ export async function syncOfflineOrders() {
                     payment_status: order.payment_status || 'pagado',
                     total: order.total,
                     status: order.status,
+                    cash_received: order.cash_received || null,
+                    change_returned: order.change_returned || null,
                 })
                 .select()
                 .single();
@@ -79,6 +81,8 @@ export async function saveOrder(order: Order): Promise<boolean> {
                     payment_status: order.payment_status || 'pagado',
                     total: order.total,
                     status: order.status,
+                    cash_received: order.cash_received || null,
+                    change_returned: order.change_returned || null,
                 })
                 .select()
                 .single();

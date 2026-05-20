@@ -70,7 +70,7 @@ export function Sidebar() {
                         <button
                             key={cat}
                             onClick={() => setSelectedCategory(cat)}
-                            className={`min-w-[4.5rem] md:w-full md:aspect-square flex flex-col items-center justify-center p-2 md:p-0 rounded-2xl md:rounded-[1.5rem] transition-all
+                            className={`flex-shrink-0 w-auto md:w-full md:aspect-square flex flex-col items-center justify-center px-4 py-2 md:p-0 rounded-2xl md:rounded-[1.5rem] transition-all
                 ${isActive ? 'shadow-ambient bg-white' : 'hover:bg-black/5'}
               `}
                             style={{
@@ -87,16 +87,16 @@ export function Sidebar() {
 
                 {/* Controles extra para móvil (al final de la lista) */}
                 {true && (
-                    <Link href="/admin" className="md:hidden min-w-[4.5rem] flex flex-col items-center justify-center p-2 rounded-2xl transition-all hover:bg-black/5" style={{ color: 'var(--color-on-surface-variant)' }}>
+                    <Link href="/admin" className="md:hidden flex-shrink-0 w-auto flex flex-col items-center justify-center px-4 py-2 rounded-2xl transition-all hover:bg-black/5" style={{ color: 'var(--color-on-surface-variant)' }}>
                         <div className="mb-1 scale-75"><LayoutDashboard size={24} /></div>
                         <span className="text-[10px] font-bold text-center leading-tight">Admin</span>
                     </Link>
                 )}
-                <button onClick={handleOpenEndShift} className="md:hidden min-w-[4.5rem] flex flex-col items-center justify-center p-2 rounded-2xl transition-all hover:bg-black/5" style={{ color: 'var(--color-on-surface-variant)' }}>
+                <button onClick={handleOpenEndShift} className="md:hidden flex-shrink-0 w-auto flex flex-col items-center justify-center px-4 py-2 rounded-2xl transition-all hover:bg-black/5" style={{ color: 'var(--color-on-surface-variant)' }}>
                     <div className="mb-1 scale-75"><LogOut size={24} /></div>
                     <span className="text-[10px] font-bold text-center leading-tight whitespace-nowrap">Cerrar</span>
                 </button>
-                <button onClick={() => signOut()} className="md:hidden min-w-[4.5rem] flex flex-col items-center justify-center p-2 rounded-2xl transition-all hover:bg-black/5 text-red-500">
+                <button onClick={() => signOut()} className="md:hidden flex-shrink-0 w-auto flex flex-col items-center justify-center px-4 py-2 rounded-2xl transition-all hover:bg-black/5 text-red-500">
                     <div className="mb-1 scale-75"><LogOut size={24} /></div>
                     <span className="text-[10px] font-bold text-center leading-tight whitespace-nowrap">Salir</span>
                 </button>

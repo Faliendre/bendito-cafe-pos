@@ -4,10 +4,16 @@ import { usePos } from '@/lib/pos-context';
 import { Minus, Plus, Trash2, CreditCard, Banknote, QrCode } from 'lucide-react';
 
 export function OrderSummary() {
-    const { cart, removeFromCart, updateQuantity, cartTotal, clearCart, checkout, activeOrderId, openOrders, showMessage } = usePos();
+    const { cart, removeFromCart, updateQuantity, cartTotal, clearCart, checkout, activeOrderId, openOrders, showMessage, selectedCategory } = usePos();
     const [customerName, setCustomerName] = useState('');
     const [showPayment, setShowPayment] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState<'efectivo' | 'QR' | 'tarjeta' | null>(null);
+    const [cashReceived, setCashReceived] = useState<string>('');
+
+    const cashReceivedNum = parseFloat(cashReceived) || 0;
+    const changeToReturn = cashReceivedNum >= cartTotal ? cashReceivedNum - cartTotal : 0;
+    const isCashValid = cashReceivedNum >= cartTotal;
 
     React.useEffect(() => {
         if (activeOrderId) {
@@ -22,10 +28,14 @@ export function OrderSummary() {
 
     const handleCheckout = async (method: 'efectivo' | 'QR' | 'tarjeta') => {
         setIsProcessing(true);
-        const success = await checkout(method, customerName);
+        const received = method === 'efectivo' ? cashReceivedNum : undefined;
+        const change = method === 'efectivo' ? changeToReturn : undefined;
+        const success = await checkout(method, customerName, 'pagado', received, change);
         setIsProcessing(false);
         if (success) {
             setShowPayment(false);
+            setPaymentMethod(null);
+            setCashReceived('');
             setCustomerName('');
             showMessage("Pago Exitoso", "La venta se ha registrado correctamente.", "success");
         } else {
@@ -38,6 +48,16 @@ export function OrderSummary() {
             {/* Header */}
             <div className="p-6 pb-4">
                 <h2 className="font-display text-2xl font-bold tracking-tight mb-4 text-on-surface">Orden Actual</h2>
+                
+                {activeOrderId && selectedCategory === 'Mesas Abiertas' && (
+                    <div className="mb-4 p-3 rounded-2xl bg-orange-50 border border-orange-100 text-orange-800 text-xs font-semibold flex items-center justify-between shadow-sm animate-pulse">
+                        <div className="flex flex-col gap-0.5">
+                            <span className="font-bold">Mesa Activa: {customerName || 'Sin Nombre'}</span>
+                            <span className="text-[10px] opacity-70">Para editar, selecciona un producto del menú</span>
+                        </div>
+                    </div>
+                )}
+
                 <input
                     type="text"
                     placeholder="Nombre del cliente o mesa..."
@@ -131,28 +151,130 @@ export function OrderSummary() {
             {/* Payment Modal */}
             {showPayment && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center glass-panel p-4">
-                    <div className="bg-white p-8 rounded-3xl max-w-md w-full shadow-ambient flex flex-col">
-                        <h3 className="font-display text-3xl font-bold mb-2 text-center text-on-surface">Método de Pago</h3>
-                        <p className="text-center opacity-70 mb-8 text-lg">Monto total: <strong className="text-black">Bs. {cartTotal.toFixed(2)}</strong></p>
+                    <div className="bg-white p-8 rounded-3xl max-w-md w-full shadow-ambient flex flex-col" style={{ background: 'var(--color-surface-container-highest)' }}>
+                        {paymentMethod === null ? (
+                            <>
+                                <h3 className="font-display text-3xl font-bold mb-2 text-center text-on-surface">Método de Pago</h3>
+                                <p className="text-center opacity-70 mb-8 text-lg">Monto total: <strong className="text-black">Bs. {cartTotal.toFixed(2)}</strong></p>
 
-                        <div className="space-y-4 mb-8">
-                            <button onClick={() => handleCheckout('efectivo')} disabled={isProcessing} className="w-full flex items-center p-5 rounded-2xl border border-ghost hover:border-black transition-colors">
-                                <Banknote className="mr-4 text-green-600" size={32} />
-                                <span className="font-bold text-xl flex-1 text-left">Efectivo</span>
-                            </button>
-                            <button onClick={() => handleCheckout('tarjeta')} disabled={isProcessing} className="w-full flex items-center p-5 rounded-2xl border border-ghost hover:border-black transition-colors">
-                                <CreditCard className="mr-4 text-blue-600" size={32} />
-                                <span className="font-bold text-xl flex-1 text-left">Tarjeta</span>
-                            </button>
-                            <button onClick={() => handleCheckout('QR')} disabled={isProcessing} className="w-full flex items-center p-5 rounded-2xl border border-ghost hover:border-black transition-colors">
-                                <QrCode className="mr-4 text-black" size={32} />
-                                <span className="font-bold text-xl flex-1 text-left">QR Simple</span>
-                            </button>
-                        </div>
+                                <div className="space-y-4 mb-8">
+                                    <button 
+                                        onClick={() => setPaymentMethod('efectivo')} 
+                                        disabled={isProcessing} 
+                                        className="w-full flex items-center p-5 rounded-2xl border border-ghost hover:border-black hover:bg-black/[0.02] active:scale-95 transition-all cursor-pointer"
+                                    >
+                                        <Banknote className="mr-4 text-green-600 animate-pulse" size={32} />
+                                        <span className="font-bold text-xl flex-1 text-left">Efectivo</span>
+                                    </button>
+                                    <button 
+                                        onClick={() => handleCheckout('tarjeta')} 
+                                        disabled={isProcessing} 
+                                        className="w-full flex items-center p-5 rounded-2xl border border-ghost hover:border-black hover:bg-black/[0.02] active:scale-95 transition-all cursor-pointer"
+                                    >
+                                        <CreditCard className="mr-4 text-blue-600" size={32} />
+                                        <span className="font-bold text-xl flex-1 text-left">Tarjeta</span>
+                                    </button>
+                                    <button 
+                                        onClick={() => handleCheckout('QR')} 
+                                        disabled={isProcessing} 
+                                        className="w-full flex items-center p-5 rounded-2xl border border-ghost hover:border-black hover:bg-black/[0.02] active:scale-95 transition-all cursor-pointer"
+                                    >
+                                        <QrCode className="mr-4 text-black" size={32} />
+                                        <span className="font-bold text-xl flex-1 text-left">QR Simple</span>
+                                    </button>
+                                </div>
 
-                        <button onClick={() => setShowPayment(false)} disabled={isProcessing} className="w-full py-4 text-center font-bold text-lg opacity-60 hover:opacity-100">
-                            Volver
-                        </button>
+                                <button 
+                                    onClick={() => { setShowPayment(false); setPaymentMethod(null); setCashReceived(''); }} 
+                                    disabled={isProcessing} 
+                                    className="w-full py-4 text-center font-bold text-lg opacity-60 hover:opacity-100 cursor-pointer"
+                                >
+                                    Volver
+                                </button>
+                            </>
+                        ) : (
+                            <div className="space-y-6">
+                                <div className="text-center">
+                                    <h3 className="font-display text-2xl font-bold mb-1 text-on-surface">Cobro en Efectivo</h3>
+                                    <p className="opacity-70 text-sm">Total a cobrar: <strong className="text-black">Bs. {cartTotal.toFixed(2)}</strong></p>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-black uppercase tracking-wider opacity-70">Efectivo Recibido</label>
+                                    <div className="relative">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-lg opacity-60">Bs.</span>
+                                        <input
+                                            type="number"
+                                            step="0.10"
+                                            placeholder="0.00"
+                                            value={cashReceived}
+                                            onChange={(e) => setCashReceived(e.target.value)}
+                                            className="w-full pl-12 pr-4 py-4 rounded-xl border border-ghost shadow-sm focus:outline-none text-xl font-bold text-black"
+                                            style={{ background: 'var(--color-surface-container-lowest)' }}
+                                            autoFocus
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Suggestion Pills */}
+                                <div className="space-y-2">
+                                    <span className="block text-[10px] font-black uppercase tracking-wider opacity-50">Billetes comunes:</span>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        <button
+                                            type="button"
+                                            onClick={() => setCashReceived(cartTotal.toFixed(2))}
+                                            className="px-3 py-2 rounded-xl border border-ghost hover:border-black font-bold text-xs bg-black/5 hover:bg-black/10 active:scale-95 transition-transform cursor-pointer"
+                                        >
+                                            Exacto
+                                        </button>
+                                        {[10, 20, 50, 100, 200].map(bill => (
+                                            <button
+                                                key={bill}
+                                                type="button"
+                                                onClick={() => setCashReceived(bill.toString())}
+                                                className="px-3 py-2 rounded-xl border border-ghost hover:border-black font-bold text-xs bg-white hover:bg-gray-50 active:scale-95 transition-transform cursor-pointer"
+                                            >
+                                                {bill} Bs.
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Results display */}
+                                {cashReceivedNum > 0 && (
+                                    <div className={`p-4 rounded-2xl border transition-colors ${isCashValid ? 'bg-green-50 border-green-200 text-green-900' : 'bg-red-50 border-red-200 text-red-900'}`}>
+                                        {isCashValid ? (
+                                            <div className="flex justify-between items-center">
+                                                <span className="font-bold text-sm">Cambio a devolver:</span>
+                                                <span className="font-display font-black text-2xl">Bs. {changeToReturn.toFixed(2)}</span>
+                                            </div>
+                                        ) : (
+                                            <p className="text-xs font-bold text-center">
+                                                El monto ingresado es menor al total de la venta. Falta: Bs. {(cartTotal - cashReceivedNum).toFixed(2)}
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+
+                                <div className="flex gap-3 pt-4 border-t border-ghost">
+                                    <button
+                                        type="button"
+                                        onClick={() => { setPaymentMethod(null); setCashReceived(''); }}
+                                        className="flex-1 py-4 font-bold rounded-xl border border-ghost text-sm hover:bg-black/5 transition-colors cursor-pointer"
+                                    >
+                                        Atrás
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => isCashValid && handleCheckout('efectivo')}
+                                        disabled={!isCashValid || isProcessing}
+                                        className={`flex-[1.5] py-4 rounded-xl font-bold text-sm text-white transition-all cursor-pointer ${!isCashValid || isProcessing ? 'opacity-50 cursor-not-allowed bg-gray-400' : 'btn-primary active:scale-95 shadow-ambient'}`}
+                                    >
+                                        Confirmar Cobro
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

@@ -22,6 +22,8 @@ CREATE TABLE orders (
   payment_status TEXT DEFAULT 'pagado', -- pagado, pendiente
   total DECIMAL(10, 2) NOT NULL,
   status TEXT DEFAULT 'entregado', -- pendiente, preparando, listo, entregado
+  cash_received DECIMAL(10, 2),
+  change_returned DECIMAL(10, 2),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -54,3 +56,20 @@ INSERT INTO products (name, price, category, variable_price) VALUES
 
 -- Enable Realtime for orders
 alter publication supabase_realtime add table orders;
+
+-- Expenses Table
+CREATE TABLE expenses (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  description TEXT NOT NULL,
+  amount DECIMAL(10, 2) NOT NULL,
+  category TEXT NOT NULL, -- e.g., 'Alquiler', 'Servicios', 'Insumos/Productos', 'Sueldos', 'Otros'
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable Realtime for expenses
+alter publication supabase_realtime add table expenses;
+
+-- --- MIGRATIONS FOR UPGRADING EXISTING DB ---
+-- Run this in your Supabase SQL Editor:
+-- ALTER TABLE orders ADD COLUMN IF NOT EXISTS cash_received DECIMAL(10, 2);
+-- ALTER TABLE orders ADD COLUMN IF NOT EXISTS change_returned DECIMAL(10, 2);

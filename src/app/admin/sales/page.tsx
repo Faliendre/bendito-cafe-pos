@@ -151,6 +151,33 @@ export default function AdminSales() {
                                                 <li className="text-center p-4 opacity-50 font-medium animate-pulse">Cargando detalles...</li>
                                             )}
                                         </ul>
+
+                                        {/* Detalle de Pago */}
+                                        <div className="mt-4 p-4 rounded-xl bg-white border border-ghost/50 shadow-sm flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+                                            <div>
+                                                <span className="text-xs font-black uppercase tracking-wider opacity-60">Información del Pago ({order.payment_method})</span>
+                                                <div className="flex gap-6 mt-2">
+                                                    <div>
+                                                        <div className="text-xs opacity-50">Monto Recibido</div>
+                                                        <div className="font-bold text-base text-black">
+                                                            Bs. {order.cash_received ? Number(order.cash_received).toFixed(2) : Number(order.total).toFixed(2)}
+                                                        </div>
+                                                    </div>
+                                                    {order.payment_method === 'efectivo' && (
+                                                        <div>
+                                                            <div className="text-xs opacity-50">Cambio Devuelto</div>
+                                                            <div className="font-bold text-base text-black">
+                                                                Bs. {order.change_returned ? Number(order.change_returned).toFixed(2) : '0.00'}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="text-left sm:text-right border-t sm:border-t-0 sm:border-l border-ghost/50 pt-2 sm:pt-0 sm:pl-4 w-full sm:w-auto">
+                                                <div className="text-xs opacity-50">Total Neto</div>
+                                                <div className="font-display font-black text-xl text-primary">Bs. {Number(order.total).toFixed(2)}</div>
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
                             </div>

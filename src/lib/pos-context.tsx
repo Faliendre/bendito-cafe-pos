@@ -15,7 +15,13 @@ interface PosContextType {
     updateQuantity: (index: number, quantity: number) => void;
     clearCart: () => void;
     cartTotal: number;
-    checkout: (paymentMethod: 'efectivo' | 'QR' | 'tarjeta' | 'pendiente', customerName?: string, paymentStatus?: 'pagado' | 'pendiente') => Promise<boolean>;
+    checkout: (
+        paymentMethod: 'efectivo' | 'QR' | 'tarjeta' | 'pendiente', 
+        customerName?: string, 
+        paymentStatus?: 'pagado' | 'pendiente',
+        cashReceived?: number,
+        changeReturned?: number
+    ) => Promise<boolean>;
     openOrders: Order[];
     refreshOpenOrders: () => Promise<void>;
     activeOrderId: string | null;
@@ -137,13 +143,17 @@ export const PosProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (!order.id) return;
         setActiveOrderId(order.id);
         setCart(order.items);
-        // We might want to switch view back to products
-        setSelectedCategory(categories.find(c => c !== 'Mesas Abiertas') || categories[0]);
     };
 
     const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-    const checkout = async (paymentMethod: 'efectivo' | 'QR' | 'tarjeta' | 'pendiente', customerName?: string, paymentStatus: 'pagado' | 'pendiente' = 'pagado') => {
+    const checkout = async (
+        paymentMethod: 'efectivo' | 'QR' | 'tarjeta' | 'pendiente', 
+        customerName?: string, 
+        paymentStatus: 'pagado' | 'pendiente' = 'pagado',
+        cashReceived?: number,
+        changeReturned?: number
+    ) => {
         if (cart.length === 0) return false;
 
         if (activeOrderId) {
@@ -157,6 +167,8 @@ export const PosProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 payment_status: paymentStatus,
                 total: cartTotal,
                 status: 'pendiente', // keep it in kitchen state or assume it's just paying
+                cash_received: cashReceived ?? null,
+                change_returned: changeReturned ?? null,
             }).eq('id', activeOrderId);
 
             if (orderError) {
@@ -192,6 +204,8 @@ export const PosProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             total: cartTotal,
             status: 'pendiente',
             items: [...cart],
+            cash_received: cashReceived,
+            change_returned: changeReturned,
         };
 
         const success = await saveOrder(newOrder);
