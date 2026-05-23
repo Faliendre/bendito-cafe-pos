@@ -22,6 +22,14 @@ interface PosContextType {
         cashReceived?: number,
         changeReturned?: number
     ) => Promise<boolean>;
+    checkoutSplit: (
+        paymentMethod: 'efectivo' | 'QR' | 'tarjeta',
+        customerName: string,
+        paidItems: OrderItem[],
+        remainingItems: OrderItem[],
+        cashReceived?: number,
+        changeReturned?: number
+    ) => Promise<boolean>;
     openOrders: Order[];
     refreshOpenOrders: () => Promise<void>;
     activeOrderId: string | null;
@@ -216,10 +224,95 @@ export const PosProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return success;
     };
 
+    const checkoutSplit = async (
+        paymentMethod: 'efectivo' | 'QR' | 'tarjeta',
+        customerName: string,
+        paidItems: OrderItem[],
+        remainingItems: OrderItem[],
+        cashReceived?: number,
+        changeReturned?: number
+    ) => {
+        if (paidItems.length === 0) return false;
+        
+        const paidTotal = paidItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        
+        // 1. Create a new completed order for the paid portion
+        const newOrder: Order = {
+            customer_name: `${customerName} (Parte)`,
+            payment_method: paymentMethod,
+            payment_status: 'pagado',
+            total: paidTotal,
+            status: 'entregado',
+            items: paidItems,
+            cash_received: cashReceived,
+            change_returned: changeReturned,
+        };
+        
+        const success = await saveOrder(newOrder);
+        if (!success) {
+            return false;
+        }
+        
+        // 2. Handle original order update / deletion
+        if (activeOrderId) {
+            const { supabase } = await import('./supabase/client');
+            
+            // Check if there are remaining items left
+            const hasRemaining = remainingItems.length > 0 && remainingItems.some(i => i.quantity > 0);
+            
+            if (hasRemaining) {
+                // Update the existing order in database
+                const remainingTotal = remainingItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                
+                const { error: orderError } = await supabase.from('orders').update({
+                    total: remainingTotal,
+                }).eq('id', activeOrderId);
+                
+                if (orderError) {
+                    console.error("Error updating original order in split", orderError);
+                }
+                
+                // Delete old items and insert remaining items
+                await supabase.from('order_items').delete().eq('order_id', activeOrderId);
+                const itemsToInsert = remainingItems.map((item) => ({
+                    order_id: activeOrderId,
+                    product_id: item.product_id,
+                    product_name: item.product_name,
+                    price: item.price,
+                    quantity: item.quantity,
+                    notes: item.notes,
+                }));
+                await supabase.from('order_items').insert(itemsToInsert);
+                
+                // Update cart in memory
+                setCart(remainingItems);
+            } else {
+                // Delete the original order as it is fully paid
+                const { error: deleteError } = await supabase.from('orders').delete().eq('id', activeOrderId);
+                if (deleteError) {
+                    console.error("Error deleting completed order in split", deleteError);
+                }
+                
+                clearCart();
+            }
+        } else {
+            // It was a local new order (unsaved to DB yet), just update cart in memory
+            const hasRemaining = remainingItems.length > 0 && remainingItems.some(i => i.quantity > 0);
+            if (hasRemaining) {
+                setCart(remainingItems);
+            } else {
+                clearCart();
+            }
+        }
+        
+        await refreshOpenOrders();
+        return true;
+    };
+
     return (
         <PosContext.Provider value={{
             products, categories, selectedCategory, setSelectedCategory,
-            cart, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal, checkout,
+            cart, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal, checkout, checkoutSplit,
             openOrders, refreshOpenOrders, activeOrderId, loadOrderIntoCart,
             showMessage, showConfirm
         }}>

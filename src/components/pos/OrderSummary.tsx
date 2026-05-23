@@ -4,16 +4,22 @@ import { usePos } from '@/lib/pos-context';
 import { Minus, Plus, Trash2, CreditCard, Banknote, QrCode } from 'lucide-react';
 
 export function OrderSummary() {
-    const { cart, removeFromCart, updateQuantity, cartTotal, clearCart, checkout, activeOrderId, openOrders, showMessage, selectedCategory } = usePos();
+    const { cart, removeFromCart, updateQuantity, cartTotal, clearCart, checkout, checkoutSplit, activeOrderId, openOrders, showMessage, selectedCategory } = usePos();
     const [customerName, setCustomerName] = useState('');
     const [showPayment, setShowPayment] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState<'efectivo' | 'QR' | 'tarjeta' | null>(null);
     const [cashReceived, setCashReceived] = useState<string>('');
 
+    // Split Bill States
+    const [showSplitModal, setShowSplitModal] = useState(false);
+    const [splitQuantities, setSplitQuantities] = useState<Record<number, number>>({});
+    const [splitSession, setSplitSession] = useState<{ paidItems: any[], remainingItems: any[], total: number } | null>(null);
+
+    const currentTotalToPay = splitSession ? splitSession.total : cartTotal;
     const cashReceivedNum = parseFloat(cashReceived) || 0;
-    const changeToReturn = cashReceivedNum >= cartTotal ? cashReceivedNum - cartTotal : 0;
-    const isCashValid = cashReceivedNum >= cartTotal;
+    const changeToReturn = cashReceivedNum >= currentTotalToPay ? cashReceivedNum - currentTotalToPay : 0;
+    const isCashValid = cashReceivedNum >= currentTotalToPay;
 
     React.useEffect(() => {
         if (activeOrderId) {
@@ -26,18 +32,66 @@ export function OrderSummary() {
         }
     }, [activeOrderId, openOrders]);
 
+    const handleIncrementSplit = (index: number, maxQty: number) => {
+        setSplitQuantities(prev => {
+            const current = prev[index] || 0;
+            if (current < maxQty) {
+                return { ...prev, [index]: current + 1 };
+            }
+            return prev;
+        });
+    };
+
+    const handleDecrementSplit = (index: number) => {
+        setSplitQuantities(prev => {
+            const current = prev[index] || 0;
+            if (current > 0) {
+                return { ...prev, [index]: current - 1 };
+            }
+            return prev;
+        });
+    };
+
+    const splitSelectedItems = cart.map((item, idx) => {
+        const qtyToPay = splitQuantities[idx] || 0;
+        return {
+            ...item,
+            quantity: qtyToPay
+        };
+    }).filter(item => item.quantity > 0);
+
+    const splitTotal = splitSelectedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+    const splitRemainingItems = cart.map((item, idx) => {
+        const qtyToPay = splitQuantities[idx] || 0;
+        const remainingQty = item.quantity - qtyToPay;
+        return {
+            ...item,
+            quantity: remainingQty
+        };
+    }).filter(item => item.quantity > 0);
+
     const handleCheckout = async (method: 'efectivo' | 'QR' | 'tarjeta') => {
         setIsProcessing(true);
         const received = method === 'efectivo' ? cashReceivedNum : undefined;
         const change = method === 'efectivo' ? changeToReturn : undefined;
-        const success = await checkout(method, customerName, 'pagado', received, change);
+        
+        let success = false;
+        if (splitSession) {
+            success = await checkoutSplit(method, customerName, splitSession.paidItems, splitSession.remainingItems, received, change);
+        } else {
+            success = await checkout(method, customerName, 'pagado', received, change);
+        }
+
         setIsProcessing(false);
         if (success) {
             setShowPayment(false);
             setPaymentMethod(null);
             setCashReceived('');
             setCustomerName('');
-            showMessage("Pago Exitoso", "La venta se ha registrado correctamente.", "success");
+            setSplitSession(null);
+            setSplitQuantities({});
+            showMessage("Pago Exitoso", "El cobro se ha registrado correctamente.", "success");
         } else {
             showMessage("Error", "No se pudo procesar el pago. Por favor intenta de nuevo.", "error");
         }
@@ -111,39 +165,55 @@ export function OrderSummary() {
                         Bs. {cartTotal.toFixed(2)}
                     </span>
                 </div>
-                <div className="flex gap-2">
-                    <button onClick={clearCart} className="flex-1 py-4 font-bold rounded-xl border border-ghost active:scale-95 transition-transform text-[10px] sm:text-xs md:text-lg">
-                        Cancelar
-                    </button>
-                    <button
-                        onClick={async () => {
-                            if (cartTotal > 0) {
-                                if (!customerName.trim()) {
-                                    showMessage("Falta información", "Por favor, ingresa el nombre del cliente o número de mesa para dejar la cuenta abierta.", "warning");
-                                    return;
+                <div className="flex flex-col gap-3">
+                    <div className="flex gap-2">
+                        <button onClick={clearCart} className="flex-1 py-3 font-bold rounded-xl border border-ghost active:scale-95 transition-transform text-[10px] sm:text-xs md:text-sm">
+                            Cancelar
+                        </button>
+                        <button
+                            onClick={async () => {
+                                if (cartTotal > 0) {
+                                    if (!customerName.trim()) {
+                                        showMessage("Falta información", "Por favor, ingresa el nombre del cliente o número de mesa para dejar la cuenta abierta.", "warning");
+                                        return;
+                                    }
+                                    setIsProcessing(true);
+                                    const success = await checkout('pendiente', customerName, 'pendiente');
+                                    setIsProcessing(false);
+                                    if (success) {
+                                        setCustomerName('');
+                                        showMessage("Cuenta Guardada", "La cuenta se ha guardado como abierta correctamente.", "success");
+                                    } else {
+                                        showMessage("Error", "No se pudo guardar la cuenta. Por favor intenta de nuevo.", "error");
+                                    }
                                 }
-                                setIsProcessing(true);
-                                const success = await checkout('pendiente', customerName, 'pendiente');
-                                setIsProcessing(false);
-                                if (success) {
-                                    setCustomerName('');
-                                    showMessage("Cuenta Guardada", "La cuenta se ha guardado como abierta correctamente.", "success");
-                                } else {
-                                    showMessage("Error", "No se pudo guardar la cuenta. Por favor intenta de nuevo.", "error");
-                                }
-                            }
-                        }}
-                        disabled={cart.length === 0 || isProcessing}
-                        className={`flex-1 py-4 rounded-xl font-bold text-[10px] sm:text-xs md:text-lg transition-all ${cart.length === 0 ? 'opacity-50 cursor-not-allowed bg-gray-100 text-gray-400' : 'bg-orange-100 text-orange-600 hover:bg-orange-200 active:scale-95'}`}
-                    >
-                        Mesa / Abierta
-                    </button>
+                            }}
+                            disabled={cart.length === 0 || isProcessing}
+                            className={`flex-1 py-3 rounded-xl font-bold text-[10px] sm:text-xs md:text-sm transition-all ${cart.length === 0 ? 'opacity-50 cursor-not-allowed bg-gray-100 text-gray-400' : 'bg-orange-100 text-orange-600 hover:bg-orange-200 active:scale-95'}`}
+                        >
+                            Mesa / Abierta
+                        </button>
+                        {cart.length > 0 && (
+                            <button
+                                onClick={() => {
+                                    const initQ: Record<number, number> = {};
+                                    cart.forEach((_, i) => { initQ[i] = 0; });
+                                    setSplitQuantities(initQ);
+                                    setShowSplitModal(true);
+                                }}
+                                disabled={isProcessing}
+                                className="flex-1 py-3 rounded-xl font-bold text-[10px] sm:text-xs md:text-sm bg-blue-100 text-blue-600 hover:bg-blue-200 active:scale-95 transition-all"
+                            >
+                                Dividir Cuenta
+                            </button>
+                        )}
+                    </div>
                     <button
                         onClick={() => cartTotal > 0 && setShowPayment(true)}
                         disabled={cart.length === 0 || isProcessing}
-                        className={`flex-[1.2] py-4 rounded-xl font-bold text-[10px] sm:text-xs md:text-lg text-white transition-all ${cart.length === 0 ? 'opacity-50 cursor-not-allowed' : 'btn-primary active:scale-95'}`}
+                        className={`w-full py-4 rounded-xl font-bold text-sm md:text-lg text-white transition-all ${cart.length === 0 ? 'opacity-50 cursor-not-allowed' : 'btn-primary active:scale-95'}`}
                     >
-                        Cobrar
+                        Cobrar Total (Bs. {cartTotal.toFixed(2)})
                     </button>
                 </div>
             </div>
@@ -155,7 +225,7 @@ export function OrderSummary() {
                         {paymentMethod === null ? (
                             <>
                                 <h3 className="font-display text-3xl font-bold mb-2 text-center text-on-surface">Método de Pago</h3>
-                                <p className="text-center opacity-70 mb-8 text-lg">Monto total: <strong className="text-black">Bs. {cartTotal.toFixed(2)}</strong></p>
+                                <p className="text-center opacity-70 mb-8 text-lg">Monto total: <strong className="text-black">Bs. {currentTotalToPay.toFixed(2)}</strong></p>
 
                                 <div className="space-y-4 mb-8">
                                     <button 
@@ -185,7 +255,7 @@ export function OrderSummary() {
                                 </div>
 
                                 <button 
-                                    onClick={() => { setShowPayment(false); setPaymentMethod(null); setCashReceived(''); }} 
+                                    onClick={() => { setShowPayment(false); setPaymentMethod(null); setCashReceived(''); setSplitSession(null); }} 
                                     disabled={isProcessing} 
                                     className="w-full py-4 text-center font-bold text-lg opacity-60 hover:opacity-100 cursor-pointer"
                                 >
@@ -196,7 +266,7 @@ export function OrderSummary() {
                             <div className="space-y-6">
                                 <div className="text-center">
                                     <h3 className="font-display text-2xl font-bold mb-1 text-on-surface">Cobro en Efectivo</h3>
-                                    <p className="opacity-70 text-sm">Total a cobrar: <strong className="text-black">Bs. {cartTotal.toFixed(2)}</strong></p>
+                                    <p className="opacity-70 text-sm">Total a cobrar: <strong className="text-black">Bs. {currentTotalToPay.toFixed(2)}</strong></p>
                                 </div>
 
                                 <div className="space-y-2">
@@ -222,7 +292,7 @@ export function OrderSummary() {
                                     <div className="flex flex-wrap gap-1.5">
                                         <button
                                             type="button"
-                                            onClick={() => setCashReceived(cartTotal.toFixed(2))}
+                                            onClick={() => setCashReceived(currentTotalToPay.toFixed(2))}
                                             className="px-3 py-2 rounded-xl border border-ghost hover:border-black font-bold text-xs bg-black/5 hover:bg-black/10 active:scale-95 transition-transform cursor-pointer"
                                         >
                                             Exacto
@@ -250,7 +320,7 @@ export function OrderSummary() {
                                             </div>
                                         ) : (
                                             <p className="text-xs font-bold text-center">
-                                                El monto ingresado es menor al total de la venta. Falta: Bs. {(cartTotal - cashReceivedNum).toFixed(2)}
+                                                El monto ingresado es menor al total de la venta. Falta: Bs. {(currentTotalToPay - cashReceivedNum).toFixed(2)}
                                             </p>
                                         )}
                                     </div>
@@ -275,6 +345,90 @@ export function OrderSummary() {
                                 </div>
                             </div>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* Split Bill Modal */}
+            {showSplitModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center glass-panel p-4">
+                    <div className="bg-white p-6 md:p-8 rounded-3xl max-w-lg w-full shadow-ambient flex flex-col max-h-[85vh]" style={{ background: 'var(--color-surface-container-highest)' }}>
+                        <h3 className="font-display text-2xl font-bold mb-1 text-center text-on-surface">Dividir Cuenta</h3>
+                        <p className="text-xs opacity-60 text-center mb-6">Selecciona los productos que pagará esta persona</p>
+
+                        {/* List of items in cart to select quantities */}
+                        <div className="flex-1 overflow-y-auto space-y-3 pr-1 py-1">
+                            {cart.map((item, idx) => {
+                                const qtyToPay = splitQuantities[idx] || 0;
+                                return (
+                                    <div key={idx} className="flex justify-between items-center p-3 rounded-2xl bg-white border border-ghost shadow-sm">
+                                        <div className="flex-1 pr-3">
+                                            <span className="font-bold text-sm block leading-tight">{item.product_name}</span>
+                                            <span className="text-xs opacity-50">Bs. {item.price.toFixed(2)} c/u (Total: {item.quantity} disp.)</span>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <button
+                                                type="button"
+                                                onClick={() => handleDecrementSplit(idx)}
+                                                className="p-1 rounded-full bg-black/5 hover:bg-black/10 active:scale-95 transition-transform"
+                                            >
+                                                <Minus size={16} />
+                                            </button>
+                                            <span className="font-bold w-6 text-center text-base">{qtyToPay}</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleIncrementSplit(idx, item.quantity)}
+                                                className="p-1 rounded-full bg-black/5 hover:bg-black/10 active:scale-95 transition-transform"
+                                            >
+                                                <Plus size={16} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Calculated subtotals */}
+                        <div className="mt-6 p-4 rounded-2xl bg-black/5 space-y-2">
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="opacity-70">Monto Seleccionado:</span>
+                                <span className="font-bold text-base">Bs. {splitTotal.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm border-t border-ghost/40 pt-2">
+                                <span className="opacity-70">Monto Restante:</span>
+                                <span className="font-bold text-base opacity-75">Bs. {Math.max(0, cartTotal - splitTotal).toFixed(2)}</span>
+                            </div>
+                        </div>
+
+                        {/* Modal Action Buttons */}
+                        <div className="flex gap-3 mt-6">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setShowSplitModal(false);
+                                    setSplitQuantities({});
+                                }}
+                                className="flex-1 py-4 font-bold rounded-xl border border-ghost text-sm hover:bg-black/5 transition-colors cursor-pointer text-center"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="button"
+                                disabled={splitTotal === 0}
+                                onClick={() => {
+                                    setSplitSession({
+                                        paidItems: splitSelectedItems,
+                                        remainingItems: splitRemainingItems,
+                                        total: splitTotal
+                                    });
+                                    setShowSplitModal(false);
+                                    setShowPayment(true);
+                                }}
+                                className={`flex-[1.5] py-4 rounded-xl font-bold text-sm text-white transition-all text-center cursor-pointer ${splitTotal === 0 ? 'opacity-50 cursor-not-allowed bg-gray-400' : 'btn-primary active:scale-95'}`}
+                            >
+                                Cobrar Parte (Bs. {splitTotal.toFixed(2)})
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
