@@ -33,7 +33,13 @@ export function Sidebar() {
         if (openOrders.length === 0) {
             setLoadingSummary(true);
             try {
-                const { data, error } = await supabase.from('orders').select('*').eq('payment_status', 'pagado');
+                const startOfToday = new Date();
+                startOfToday.setHours(0, 0, 0, 0);
+                const { data, error } = await supabase
+                    .from('orders')
+                    .select('*')
+                    .eq('payment_status', 'pagado')
+                    .gte('created_at', startOfToday.toISOString());
                 if (!error && data) {
                     let e = 0, q = 0, t = 0;
                     data.forEach(o => {

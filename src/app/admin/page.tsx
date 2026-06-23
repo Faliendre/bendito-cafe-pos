@@ -14,10 +14,29 @@ export default function AdminDashboard() {
     useEffect(() => {
         async function fetchStats() {
             try {
-                const { data, error } = await supabase.from('orders').select('*');
-                if (data && !error) {
-                    setOrders(data);
+                let allOrders: any[] = [];
+                let page = 0;
+                const pageSize = 1000;
+                while (true) {
+                    const { data, error } = await supabase
+                        .from('orders')
+                        .select('*')
+                        .order('created_at', { ascending: false })
+                        .range(page * pageSize, (page + 1) * pageSize - 1);
+                    
+                    if (error) {
+                        console.error(error);
+                        break;
+                    }
+                    if (data && data.length > 0) {
+                        allOrders = [...allOrders, ...data];
+                        if (data.length < pageSize) break;
+                        page++;
+                    } else {
+                        break;
+                    }
                 }
+                setOrders(allOrders);
             } catch (e) {
                 console.error(e);
             }
