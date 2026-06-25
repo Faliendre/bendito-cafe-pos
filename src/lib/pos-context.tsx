@@ -42,12 +42,74 @@ const PosContext = createContext<PosContextType | undefined>(undefined);
 
 // Mock products for when DB is empty or missing setup
 const mockProducts: Product[] = [
-    { id: '1', name: 'Espresso', price: 15.00, category: 'Café', variable_price: false, active: true },
-    { id: '2', name: 'Cappuccino', price: 22.00, category: 'Café', variable_price: false, active: true },
-    { id: '3', name: 'Iced Latte', price: 25.00, category: 'Bebidas Frías', variable_price: false, active: true },
-    { id: '4', name: 'Frappé Oreo', price: 30.00, category: 'Frappes', variable_price: false, active: true },
-    { id: '5', name: 'Açaí', price: 0.00, category: 'Açaí', variable_price: true, active: true },
-    { id: '6', name: 'Croissant', price: 15.00, category: 'Panadería', variable_price: false, active: true },
+    // Bebidas Calientes
+    { id: 'm1', name: 'Espresso', price: 10.00, category: 'Bebidas Calientes', description: 'La base de todo. Extracción pura de café (20ml).', variable_price: false, active: true },
+    { id: 'm2', name: 'Cortado', price: 10.00, category: 'Bebidas Calientes', description: 'Espresso suavizado con leche.', variable_price: false, active: true },
+    { id: 'm3', name: 'Americano', price: 12.00, category: 'Bebidas Calientes', description: 'Doble espresso suavemente diluido en agua caliente.', variable_price: false, active: true },
+    { id: 'm4', name: 'Flat White', price: 15.00, category: 'Bebidas Calientes', description: 'Doble espresso con leche vaporizada sedosa, más intenso que un latte.', variable_price: false, active: true },
+    { id: 'm5', name: 'Cappuccino', price: 15.00, category: 'Bebidas Calientes', description: 'Equilibrio perfecto de espresso, leche vaporizada y abundante espuma.', variable_price: false, active: true },
+    { id: 'm6', name: 'Latte', price: 15.00, category: 'Bebidas Calientes', description: 'Espresso suave con una generosa cantidad de leche vaporizada.', variable_price: false, active: true },
+    { id: 'm7', name: 'Mocaccino', price: 15.00, category: 'Bebidas Calientes', description: 'Deliciosa mezcla de espresso, chocolate y leche vaporizada.', variable_price: false, active: true },
+    { id: 'm8', name: 'Vanilla Latte', price: 15.00, category: 'Bebidas Calientes', description: 'Tu latte favorito con un toque dulce de vainilla.', variable_price: false, active: true },
+    { id: 'm9', name: 'Spanish Coffee', price: 15.00, category: 'Bebidas Calientes', description: 'Una versión especial de café con leche, con notas dulces.', variable_price: false, active: true },
+    { id: 'm10', name: 'Chocolate Caliente', price: 15.00, category: 'Bebidas Calientes', description: 'Intenso y cremoso chocolate caliente.', variable_price: false, active: true },
+    { id: 'm11', name: 'Affogato', price: 18.00, category: 'Bebidas Calientes', description: 'Bola de helado de vainilla "ahogada" en espresso caliente.', variable_price: false, active: true },
+    { id: 'm12', name: 'Matcha Latte Caliente', price: 20.00, category: 'Bebidas Calientes', description: 'Suave mezcla de té matcha japonés con leche vaporizada, de sabor delicado y ligeramente herbal.', variable_price: false, active: true },
+
+    // Bebidas Frías
+    { id: 'm13', name: 'Iced Tea', price: 16.00, category: 'Bebidas Frías', description: 'Té frío refrescante, ligeramente endulzado y servido con hielo.', variable_price: false, active: true },
+    { id: 'm14', name: 'Iced Latte', price: 16.00, category: 'Bebidas Frías', description: 'Espresso con leche fría, servido sobre hielo.', variable_price: false, active: true },
+    { id: 'm15', name: 'Iced Mocaccino Latte', price: 16.00, category: 'Bebidas Frías', description: 'Versión fría de nuestro mocaccino, con chocolate y espresso.', variable_price: false, active: true },
+    { id: 'm16', name: 'Iced Caramel Latte', price: 16.00, category: 'Bebidas Frías', description: 'Latte frío con un rico toque de dulce de leche.', variable_price: false, active: true },
+    { id: 'm17', name: 'Iced Vanilla Latte', price: 16.00, category: 'Bebidas Frías', description: 'Refrescante latte frío con esencia de vainilla.', variable_price: false, active: true },
+    { id: 'm18', name: 'Espresso Orange', price: 16.00, category: 'Bebidas Frías', description: 'Espresso con un toque de jugo de naranja.', variable_price: false, active: true },
+    { id: 'm19', name: 'Iced Matcha Latte', price: 26.00, category: 'Bebidas Frías', description: 'Refrescante combinación de matcha con leche fría, ligeramente dulce y servido sobre hielo.', variable_price: false, active: true },
+
+    // Té
+    { id: 'm20', name: 'Té clásico', price: 12.00, category: 'Té', description: 'Té clásico caliente.', variable_price: false, active: true },
+    { id: 'm21', name: 'Té de frutos rojos', price: 12.00, category: 'Té', description: 'Té caliente con sabor a frutos rojos.', variable_price: false, active: true },
+    { id: 'm22', name: 'Té de manzanilla / trimate', price: 12.00, category: 'Té', description: 'Infusión caliente de manzanilla o trimate.', variable_price: false, active: true },
+    { id: 'm23', name: 'Té de piña', price: 12.00, category: 'Té', description: 'Infusión caliente sabor a piña.', variable_price: false, active: true },
+
+    // Frappes
+    { id: 'm24', name: 'Frappuccino', price: 23.00, category: 'Frappes', description: 'Frappé de café frappuccino con leche.', variable_price: false, active: true },
+    { id: 'm25', name: 'Frappé Durazno (Leche)', price: 25.00, category: 'Frappes', description: 'Frappé de durazno con leche.', variable_price: false, active: true },
+    { id: 'm26', name: 'Frappé Mocca', price: 23.00, category: 'Frappes', description: 'Frappé mocca con café, chocolate y leche.', variable_price: false, active: true },
+    { id: 'm27', name: 'Frappé Caramel', price: 23.00, category: 'Frappes', description: 'Frappé de café caramel con leche.', variable_price: false, active: true },
+    { id: 'm28', name: 'Frappé Oreo', price: 26.00, category: 'Frappes', description: 'Delicioso frappé con galletas Oreo y leche.', variable_price: false, active: true },
+    { id: 'm29', name: 'Frappé Frutos Rojos (Leche)', price: 25.00, category: 'Frappes', description: 'Frappé de frutos rojos con leche.', variable_price: false, active: true },
+    { id: 'm30', name: 'Frappé Pie de Limón', price: 25.00, category: 'Frappes', description: 'Novedoso frappé con sabor a pie de limón con leche.', variable_price: false, active: true },
+    { id: 'm31', name: 'Frappé Frutos Rojos (Agua)', price: 20.00, category: 'Frappes', description: 'Frappé de frutos rojos a base de agua.', variable_price: false, active: true },
+    { id: 'm32', name: 'Frappé Durazno (Agua)', price: 20.00, category: 'Frappes', description: 'Frappé de durazno a base de agua.', variable_price: false, active: true },
+
+    // Cócteles
+    { id: 'm33', name: 'Mojito', price: 25.00, category: 'Cócteles', description: 'Con hierba buena.', variable_price: false, active: true },
+    { id: 'm34', name: 'Mojito de Frutilla', price: 25.00, category: 'Cócteles', description: 'Con toques de fruta natural.', variable_price: false, active: true },
+    { id: 'm35', name: 'Café Irlandés', price: 25.00, category: 'Cócteles', description: 'Café caliente con un toque de whisky irlandés, azúcar y una capa de crema suave.', variable_price: false, active: true },
+    { id: 'm36', name: 'Daiquiri de Frutilla', price: 25.00, category: 'Cócteles', description: 'Bebida frappeada de Frutilla con toques de fruta natural.', variable_price: false, active: true },
+
+    // Bebidas Variadas
+    { id: 'm37', name: 'Limoncello', price: 17.00, category: 'Bebidas Variadas', description: 'Bebida de limón italiana refrescante.', variable_price: false, active: true },
+    { id: 'm38', name: 'Piña con hierba buena', price: 17.00, category: 'Bebidas Variadas', description: 'Licuado o infusión de piña con hierba buena.', variable_price: false, active: true },
+
+    // Açaí
+    { id: 'm_acai', name: 'Açaí', price: 0.00, category: 'Açaí', description: 'Açaí con toppings (precio variable según adiciones).', variable_price: true, active: true },
+
+    // Panadería
+    { id: 'm39', name: 'Cuñapé', price: 8.00, category: 'Panadería', description: 'Panecillo de queso tradicional hecho con almidón de yuca.', variable_price: false, active: true },
+    { id: 'm40', name: 'Galletas Crumble Cookies', price: 12.00, category: 'Panadería', description: 'Crujientes por fuera, suaves por dentro.', variable_price: false, active: true },
+    { id: 'm41', name: 'Cinnamon Roll', price: 15.00, category: 'Panadería', description: 'Rollo de canela con glaseado.', variable_price: false, active: true },
+    { id: 'm42', name: 'Panini', price: 18.00, category: 'Panadería', description: 'Sándwich caliente con jamón y queso en pan de masa madre, prensado y dorado, con relleno suave y balanceado, ideal para acompañar tu café.', variable_price: false, active: true },
+    { id: 'm43', name: 'Pizzanini', price: 20.00, category: 'Panadería', description: 'Mini pizza elaborada con masa madre, base crujiente y ligera, cubierta con salsa de tomate, orégano, jamón y queso gratinado.', variable_price: false, active: true },
+    { id: 'm44', name: 'Sándwich de croissant Salado', price: 25.00, category: 'Panadería', description: 'Croissant, hojaldrado y crujiente, relleno con doble jamón y doble queso fundido, con toques de tomate cherry, ligeramente tostado para resaltar su sabor.', variable_price: false, active: true },
+    { id: 'm45', name: 'Sándwich de croissant Dulce', price: 25.00, category: 'Panadería', description: 'Croissant, hojaldrado y crujiente, relleno con dulce de leche, crema y duraznos frescos picados, ligeramente tostado para realzar su dulzura y sabor.', variable_price: false, active: true },
+    { id: 'm46', name: 'Creppes', price: 25.00, category: 'Panadería', description: 'Delicada masa francesa preparada al momento, servida con fruta fresca de temporada, una porción de helado, crema, jaleas y toppings seleccionados.', variable_price: false, active: true },
+    { id: 'm47', name: 'Waffles', price: 25.00, category: 'Panadería', description: 'Waffle artesanal recién horneado, acompañado de fruta fresca de temporada, una porción de helado, crema, jaleas y toppings seleccionados.', variable_price: false, active: true },
+    { id: 'm48', name: 'Panqueques', price: 25.00, category: 'Panadería', description: 'Esponjosos panqueques recién preparados, servidos con fruta fresca de temporada, una porción de helado, crema, jaleas y toppings seleccionados.', variable_price: false, active: true },
+
+    // Extras
+    { id: 'm49', name: 'Espresso (Extra)', price: 3.00, category: 'Extras', description: 'Shot de espresso adicional.', variable_price: false, active: true },
+    { id: 'm50', name: 'Crema (Extra)', price: 6.00, category: 'Extras', description: 'Crema batida o crema adicional.', variable_price: false, active: true },
 ];
 
 export const PosProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

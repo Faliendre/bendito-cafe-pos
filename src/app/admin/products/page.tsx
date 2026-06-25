@@ -24,7 +24,7 @@ export default function AdminProducts() {
     });
 
     // Updated categories to match the new menu
-    const categories = ['Todas', 'Bebidas Calientes', 'Bebidas Frías', 'Frappes', 'Cócteles', 'Bebidas Variadas', 'Té', 'Panadería', 'Extras'];
+    const categories = ['Todas', 'Bebidas Calientes', 'Bebidas Frías', 'Frappes', 'Cócteles', 'Bebidas Variadas', 'Té', 'Açaí', 'Panadería', 'Extras'];
 
     useEffect(() => {
         loadProducts();
