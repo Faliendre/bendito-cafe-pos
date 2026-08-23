@@ -29,17 +29,20 @@ Sistema web moderno y responsivo de Punto de Venta (POS) diseñado para optimiza
 ```bash
 git clone [https://github.com/Faliendre/bendito-cafe-pos.git](https://github.com/Faliendre/bendito-cafe-pos.git)
 cd bendito-cafe-pos
+```
 ### 2. Instalar dependencias
+```bash
 npm install
 # o con yarn / pnpm:
 # yarn install
 # pnpm install
-###3. Configurar variables de entorno
+```
+### 3. Configurar variables de entorno
 Crea un archivo .env.local en la raíz del proyecto y añade tus credenciales de Supabase:
 NEXT_PUBLIC_SUPABASE_URL=[https://tu-proyecto.supabase.co](https://tu-proyecto.supabase.co)
 NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key-de-supabase
-###4. Ejecutar el servidor de desarrollo
-Bash
+### 4. Ejecutar el servidor de desarrollo
+```Bash
 npm run dev
 Abre http://localhost:3000 en tu navegador para ver la aplicación en ejecución.
 ```
@@ -48,7 +51,5 @@ Abre http://localhost:3000 en tu navegador para ver la aplicación en ejecución
 Favio Aliendre — Lic. en Ingeniería de Sistemas & Full Stack Developer
 
 GitHub: @Faliendre
-
-LinkedIn: favio-aliendre-baldellon
 
 Email: favioaliendre@gmail.com
